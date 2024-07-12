@@ -41,20 +41,8 @@ app.post('/callback', line.middleware(config), (req, res) => {
     });
 });
 
-app.get('/connect', async (req,res) => {
-  try {
-    await handleSdkConnect();
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal Server Error');
-  }
+app.get('/hello', async (req,res) => {
   res.send('Hello');
-});
-
-app.post('/provider', (req, res) => {
-  const provider = req.body.provider;
-  console.log('Received provider:', provider);
-  res.sendStatus(200);
 });
 
 // event handler
@@ -159,7 +147,7 @@ const replyText = (token, texts) => {
 };
 
 // listen on port
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8081;
 app.listen(port, () => {
   console.log(`listening on ${port}`);
 });
