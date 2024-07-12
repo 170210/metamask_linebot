@@ -9,6 +9,8 @@ import {
   handleSdkQuery,
   handleSdkTx,
 } from './connections.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // create LINE SDK config from env variables
 const config = {
@@ -157,7 +159,7 @@ const replyText = (token, texts) => {
 };
 
 // listen on port
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 app.listen(port, () => {
   console.log(`listening on ${port}`);
 });
