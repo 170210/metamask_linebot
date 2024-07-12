@@ -9,8 +9,8 @@ import {
   handleSdkQuery,
   handleSdkTx,
 } from './connections.js';
-import dotenv from 'dotenv';
-dotenv.config();
+// import dotenv from 'dotenv';
+// dotenv.config();
 
 // create LINE SDK config from env variables
 const config = {
