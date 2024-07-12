@@ -23,9 +23,9 @@ export function handleSdkConnect(userId) {
       checkInstallationImmediately: false,
       modals: {
         install: ({ link }) => {
-//          const metamasklink=link.replace("https://metamask.app.link/", "metamask://");
-          qrcode.generate(link, { small: true }, (qr) => console.log(qr));
-          eventEmitter.emit('linkGenerated', link); 
+          const metamasklink=link.replace("https://metamask.app.link/", "metamask://");
+//          qrcode.generate(link, { small: true }, (qr) => console.log(qr));
+          eventEmitter.emit('linkGenerated', metamasklink); 
         },
       },
     };
