@@ -130,6 +130,7 @@ export async function handleSdkTx(userId) {
           value: "0x8ac7230489e80000",
         }],
       });
+      return `tx hash: ${result}`
     } catch (error) {
       if (error.code === 4001) {
         return 'Tx has been cancelled';
@@ -137,7 +138,6 @@ export async function handleSdkTx(userId) {
         return 'Unknown error, please retry!';
       }
     }
-    return `tx hash: ${result}`
   }
 }
 
