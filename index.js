@@ -14,15 +14,12 @@ import {
 
 // create LINE SDK config from env variables
 const config = {
-  channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.CHANNEL_SECRET,
-  handler: "/callback",
 };
 
 // create LINE SDK client
 const client = new line.messagingApi.MessagingApiClient({
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
-  // baseURL: process.env.BASE_URL,
 });
 
 // create Express app
@@ -147,7 +144,7 @@ const replyText = (token, texts) => {
 };
 
 // listen on port
-const port = process.env.PORT || 8081;
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`listening on ${port}`);
 });
