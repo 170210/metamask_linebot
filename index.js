@@ -143,6 +143,8 @@ const replyText = (token, texts) => {
   );
 };
 
+process.chdir('./tmp');
+
 // listen on port
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
