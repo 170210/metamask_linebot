@@ -1,6 +1,8 @@
 import { MetaMaskSDK } from '@metamask/sdk';
 import qrcode from 'qrcode-terminal';
 import { EventEmitter } from 'events';
+import {blockchains} from './configuration.js';
+import {replyConfriming} from './index.js'
 
 const connectors = new Map();
 
@@ -24,7 +26,7 @@ export function handleSdkConnect(userId) {
       modals: {
         install: ({ link }) => {
           const metamasklink=link.replace("https://metamask.app.link/", "metamask://");
-//          qrcode.generate(link, { small: true }, (qr) => console.log(qr));
+          // qrcode.generate(link, { small: true }, (qr) => console.log(qr));
           eventEmitter.emit('linkGenerated', metamasklink); 
         },
       },
@@ -46,52 +48,36 @@ export async function checkSdkConnect(userId) {
   }
 }
 
-export async function handleAddNetwork(userId){
+export async function handleChangeNetwork(userId, blockchainName) {
   const sdk = connectors.get(userId)
   if (sdk === undefined) {
     return "please connect first"
   } else {
     const provider = sdk.getProvider();
-    try {
-      await provider.request({
-        method: 'wallet_addEthereumChain',
-        params: [
-          {
-            chainId: '0x3e9',
-            rpcUrls: ['https://public-en-baobab.klaytn.net'],
-            chainName: 'Klaytn Baobab',
-            nativeCurrency: { name: 'KLAY', decimals: 18, symbol: 'KLAY' },
-            blockExplorerUrls: null,
-          },
-        ],
-      });
-    } catch (error) {
-        return 'Unknown error, please retry!';
-    }
-    return "change network success"
-  }
-}
-
-export async function handleChangeNetwork(userId, networkId) {
-  const sdk = connectors.get(userId)
-  if (sdk === undefined) {
-    return "please connect first"
-  } else {
-    const provider = sdk.getProvider();
-    try {
-      await provider.request({
-        method: 'wallet_switchEthereumChain',
-        params: [
-          {
-            chainId: networkId,
-          },
-        ],
-      });
-    } catch (error) {
-      if (error.code === -32603) {
-        return 'Please add network firstly';
-      } else {
-        return 'Unknown error, please retry!';
+    replyConfriming(userId)
+    if (blockchainName == "Ethernum"){
+      try {
+        await provider.request({
+          method: 'wallet_switchEthereumChain',
+          params: [
+            {
+              chainId: "0x1",
+            },
+          ],
+        });
+      } catch (error) {
+          return 'Unknown error, please retry!';
+      }
+    } else {
+      try {
+        await provider.request({
+          method: 'wallet_addEthereumChain',
+          params: [
+            blockchains[blockchainName]
+          ],
+        });
+      } catch (error) {
+          return 'Unknown error, please retry!';
       }
     }
     return "change network success"
@@ -121,6 +107,7 @@ export async function handleSdkTx(userId) {
   } else {
     const accounts = await sdk.connect();
     const provider = sdk.getProvider();
+    replyConfriming(userId)
     try {
       const result=await provider.request({
         method: 'eth_sendTransaction',

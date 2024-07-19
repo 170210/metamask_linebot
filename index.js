@@ -5,7 +5,6 @@ import {
   checkSdkConnect,
   handleSdkDisconnect,
   handleChangeNetwork,
-  handleAddNetwork,
   handleSdkQuery,
   handleSdkTx,
 } from './connections.js';
@@ -54,6 +53,13 @@ function handleEvent(event) {
         default:
           throw new Error(`Unknown message: ${JSON.stringify(message)}`);
       }
+    case 'postback':
+      const data = event.postback.data;
+      // switch (data) {
+      //   case 'dapp':
+      //   default:
+      return changeNetwork(event.replyToken, event.source.userId, data);
+      // }
     case 'follow':
       return replyText(event.replyToken, description);
     default:
@@ -62,13 +68,11 @@ function handleEvent(event) {
 }
 
 const description = `This is an example of a line bot for connecting to Metamask wallets and sending transactions.
-            
+
 Commands list: 
 /Description - Show description
 /Connect - Connect to a wallet
 /MyWallet - Show connected wallet address
-/Ethernum - Switch to Ethernum mainnet(Be careful)
-/Klaytn Baobab - Switch to Klaytn Baobab(testnet)
 /Balance - Query balance
 /Pay - Send 10 coin to target address
 /Disconnect - Disconnect from the wallet
@@ -82,10 +86,6 @@ function handleText(message, replyToken, source) {
       return handleConnect(replyToken,source.userId);
     case 'Mywallet':
       return checkConnect(replyToken,source.userId);
-    case 'Ethernum':
-      return changeNetwork(replyToken,source.userId,"0x1");
-    case 'Klaytn Baobab':
-      return addNetwork(replyToken,source.userId);
     case 'Balance':
         return handleQuery(replyToken,source.userId);
     case 'Pay':
@@ -108,13 +108,8 @@ async function checkConnect(replyToken,userId) {
   return replyText(replyToken, result);
 }
 
-async function changeNetwork(replyToken,userId,networkId) {
-  const result = await handleChangeNetwork(userId,networkId)
-  return replyText(replyToken, result);
-}
-
-async function addNetwork(replyToken,userId) {
-  const result = await handleAddNetwork(userId)
+async function changeNetwork(replyToken,userId, blockchainName) {
+  const result = await handleChangeNetwork(userId, blockchainName)
   return replyText(replyToken, result);
 }
 
@@ -132,19 +127,71 @@ async function handleDisconnect(replyToken,userId) {
   const result = await handleSdkDisconnect(userId)
   return replyText(replyToken, result);
 }
+
+const quickReplyMenu={
+  items:
+    [{
+      type: "action",
+      action: {
+        type: "postback",
+        label: "Ethernum",
+        data: "Ethernum"
+      }
+    },
+    {
+      type: "action",
+      action: {
+        type: "postback",
+        label: "Klaytn",
+        data: "Klaytn"
+      }
+    },
+    {
+      type: "action",
+      action: {
+        type: "postback",
+        label: "Klaytn Baobab",
+        data: "Klaytn Baobab"
+      }
+    }
+  ]
+}
 // simple reply function
 const replyText = (token, texts) => {
   texts = Array.isArray(texts) ? texts : [texts];
+  const messages = texts.map((text) => ({ type: 'text', text }))
+  messages[messages.length - 1].quickReply = quickReplyMenu;
   return client.replyMessage(
-    {
-      replyToken: token,
-      messages: texts.map((text) => ({ type: 'text', text }))
-    }
-  );
+      {
+        replyToken: token,
+        messages: messages,
+      }
+    );
 };
 
-process.chdir('./tmp');
+export const replyConfriming = (userId) =>{
+  client.pushMessage(
+    { 
+      to: userId,
+      messages: [
+        {
+          type: "template",
+          altText: 'Buttons alt text',
+          template: {
+            type: "buttons",
+            text: "Please confirm in the wallet",
+              actions: [
+                {label: "Metamask", type : "uri", uri: "https://170210.github.io/deeplink/"}
+              ]
+          },
+          quickReply: quickReplyMenu
+        },
+      ],
+    },
+  )
+}
 
+process.chdir('./tmp');
 // listen on port
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
